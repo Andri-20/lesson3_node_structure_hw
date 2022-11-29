@@ -1,15 +1,17 @@
 const express = require('express');
-require('dotenv').config();
+const mongoose = require('mongoose');
+const {userRouter, carRouter} = require("./router");
 
+require('dotenv').config();
 const app = express();
 
-const userRouter = require('./router/user.router')
 const configs = require('./config/config');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 app.use('/users',userRouter);
+app.use('/cars',carRouter);
 
 app.use((err, req, res, next)=>{
     console.log(err);
@@ -19,6 +21,7 @@ app.use((err, req, res, next)=>{
     })
 })
 
-app.listen(configs.PORT, () => {
+app.listen(configs.PORT,  async () => {
+    await mongoose.connect(`${configs.MONGO_URL}`);
     console.log(`server listen port ${configs.PORT}`);
 })
