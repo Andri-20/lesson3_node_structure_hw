@@ -1,11 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
+require('dotenv').config();
+
 const {userRouter, carRouter} = require("./router");
 
-require('dotenv').config();
-const app = express();
-
 const configs = require('./config/config');
+const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));

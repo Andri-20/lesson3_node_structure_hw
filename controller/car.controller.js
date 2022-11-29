@@ -1,4 +1,5 @@
-let {CarService} = require('../services');
+const { carService } = require('../services');
+
 module.exports = {
     getAllCars: async (req, res, next) => {
         try {
@@ -12,7 +13,7 @@ module.exports = {
 
     findOne: async (req, res, next) => {
         try {
-            const {carId} = req.params;
+            const { carId } = req.params;
 
             const car = await carService.findOneByIdWithUser(carId);
 
@@ -30,5 +31,5 @@ module.exports = {
         } catch (e) {
             next(e);
         }
-    }
-}
+    },
+};

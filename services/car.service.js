@@ -1,15 +1,15 @@
-const Car = require('../DataBase/Car.js');
+const Car = require("../dataBase/Car");
+
 module.exports = {
     findByParams: async (filter = {}) => {
         return Car.find(filter);
     },
-    findOne: async (filter = {}) => {
-        return Car.findOne(filter);
-    },
-    findCarByIdWithUser: async (carId) => {
+
+    findOneByIdWithUser: async (carId) => {
         return Car.findById(carId).populate('user');
     },
+
     create: async (carInfo) => {
         return Car.create(carInfo);
-    }
-}
+    },
+};

@@ -1,52 +1,56 @@
-const {UserService} = require("../services");
-const User = require('../DataBase/User')
+const { userService } = require('../services');
+
 module.exports = {
     getAllUsers: async (req, res, next) => {
         try {
-            const users = await UserService.findByParams();
-            res.status(201).json(users)
+            const users = await userService.findByParams();
+
+            res.json(users);
         } catch (e) {
             next(e);
         }
     },
-    getUserByID: async (req, res, next) => {
+
+    getUserById: async (req, res, next) => {
         try {
-            const {userId} = req.params.userId;
+            const user = await userService.findByIdWithCars(req.user._id);
 
-            const user = await UserService.findByOneByParams()
-            res.status(201).json(req.user);
+            res.json(user);
         } catch (e) {
-            next(e);
+            next(e)
         }
     },
-    deleteUserById: async (req, res, next) => {
-        try {
-            const {userId} = req.params.userId;
 
-            await UserService.deleteOne(userId)
-            res.sendStatus(204).send("deleted");
-
-        } catch (e) {
-            next(e);
-        }
-    },
     updateUser: async (req, res, next) => {
         try {
-            const {userId} = req.params.userId;
-            const {userInfo} = req.body;
+            const newUserInfo = req.body;
+            const userId = req.params.userId;
 
-            const user = await UserService.update(userId, userInfo);
+            const user = await userService.updateOne(userId, newUserInfo);
+
             res.status(201).json(user);
         } catch (e) {
             next(e);
         }
     },
+
     createUser: async (req, res, next) => {
         try {
-            const user = await UserService.create(req.body);
-            res.status(201).json(user)
+            const user = await userService.create(req.body);
+
+            res.status(201).json(user);
+        } catch (e) {
+            next(e);
+        }
+    },
+
+    deleteUserById: async (req, res, next) => {
+        try {
+            await userService.deleteOne(req.params.userId);
+
+            res.status(204).send('Ok')
         } catch (e) {
             next(e);
         }
     }
-}
+};
