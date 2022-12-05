@@ -44,7 +44,7 @@ module.exports = {
         try {
             const refreshToken = req.get('Authorization');
             if (!refreshToken) {
-                throw new ApiError('token not found', 401)
+                throw new ApiError('Token not found', 401)
             }
 
             oauthService.checkToken(refreshToken, tokenTypesEnum.refreshToken)
