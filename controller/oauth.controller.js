@@ -1,9 +1,13 @@
 const oauthService = require("../services/oauth.service");
 const OAuth = require('../DataBase/OAuth');
+const emailService = require('../services/email.service');
+const {WELCOME} = require("../config/email-action.enum");
 module.exports = {
     login: async (req, res, next) => {
         try {
             const {user, body} = req;
+
+            await emailService.sendEmail('andsobtest@gmail.com', WELCOME, {userName: user.name})
 
             await oauthService.comparePasswords(user.password, body.password)
             const tokenPairs = oauthService.generateAccessTokenPair({id: user._id});
@@ -19,13 +23,13 @@ module.exports = {
     },
     refresh: async (req, res, next) => {
         try {
-            const { refreshToken, _user_id } = req.tokenInfo;
+            const {refreshToken, _user_id} = req.tokenInfo;
 
-            await OAuth.deleteOne({ refreshToken });
+            await OAuth.deleteOne({refreshToken});
 
-            const tokenPair = oauthService.generateAccessTokenPair({ id: _user_id });
+            const tokenPair = oauthService.generateAccessTokenPair({id: _user_id});
 
-            await OAuth.create({ ...tokenPair, _user_id })
+            await OAuth.create({...tokenPair, _user_id})
 
             res.status(201).json(tokenPair);
         } catch (e) {
