@@ -3,6 +3,8 @@ const ApiError = require("../error/ApiError");
 const oauthService = require('../services/oauth.service')
 const OAuth = require('../DataBase/OAuth');
 const {tokenTypesEnum} = require("../enum");
+const {FORGOT_PASS} = require("../config/token-action.enum");
+const ActionToken = require("../DataBase/ActionToken");
 
 module.exports = {
     isBodyValid: (req, res, next) => {
@@ -56,6 +58,31 @@ module.exports = {
                 throw new ApiError('token not valid')
             }
             req.tokenInfo = tokenInfo;
+
+            next()
+        } catch (e) {
+
+            next(e)
+        }
+    },
+    checkActionToken: async (req, res, next) => {
+        try {
+            const actionToken = req.get('Authorization')
+
+            if (!actionToken) {
+                throw new ApiError('Token not found', 401)
+            }
+
+            oauthService.checkActionToken(actionToken, FORGOT_PASS);
+
+            const tokenInfo = await ActionToken
+                .findOne({token: actionToken, tokenType: FORGOT_PASS})
+                .populate('_user_id');
+
+            if (!tokenInfo) {
+                throw new ApiError('Token not valid', 401)
+            }
+            req.user = tokenInfo._user_id;
 
             next()
         } catch (e) {

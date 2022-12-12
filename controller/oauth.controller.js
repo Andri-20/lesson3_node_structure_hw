@@ -1,7 +1,11 @@
 const oauthService = require("../services/oauth.service");
 const OAuth = require('../DataBase/OAuth');
+const ActionToken = require('../DataBase/ActionToken');
 const emailService = require('../services/email.service');
-const {WELCOME} = require("../config/email-action.enum");
+const userService = require('../services/user.service');
+const {WELCOME, FORGOT_PASSWORD} = require("../config/email-action.enum");
+const {FORGOT_PASS} = require("../config/token-action.enum");
+const {FRONTEND_URL} = require("../config/config");
 module.exports = {
     login: async (req, res, next) => {
         try {
@@ -38,9 +42,9 @@ module.exports = {
     },
     logout: async (req, res, next) => {
         try {
-            const { accessToken } = req.tokenInfo;
+            const {accessToken} = req.tokenInfo;
 
-            await OAuth.deleteOne({ accessToken })
+            await OAuth.deleteOne({accessToken})
 
             res.sendStatus(204);
         } catch (e) {
@@ -49,12 +53,43 @@ module.exports = {
     },
     logoutAll: async (req, res, next) => {
         try {
-            const { _user_id } = req.tokenInfo;
+            const {_user_id} = req.tokenInfo;
 
-            await OAuth.deleteMany({ _user_id })
+            await OAuth.deleteMany({_user_id})
 
             res.sendStatus(204);
         } catch (e) {
+            next(e)
+        }
+    },
+    forgotPassword: async (req, res, next) => {
+        try {
+            const user = req.user;
+
+            const actionToken = oauthService.generateActionToken(FORGOT_PASS, {email: user.email});
+
+            const forgotPassFEUrl = `${FRONTEND_URL}/password/new?token=${actionToken}`
+
+            await ActionToken.create({token: actionToken, _user_id: user._id, tokenType: FORGOT_PASS})
+            await emailService.sendEmail('andsobtest@gmail.com', FORGOT_PASSWORD, {url: forgotPassFEUrl})
+
+            res.json("ok")
+        } catch (e) {
+
+            next(e)
+        }
+    },
+    forgotPasswordAfterForgot: async (req, res, next) => {
+        try {
+            const {user, body} = req;
+            const hashPassword = await oauthService.hashPassword(body.password);
+
+            await ActionToken.deleteOne({token: req.get('Authorization')})
+            await userService.updateOne({_id: user._id}, {password: hashPassword});
+
+            res.json("ok")
+        } catch (e) {
+
             next(e)
         }
     }

@@ -2,8 +2,12 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const ApiError = require("../error/ApiError");
-const {ACCESS_SECRET, REFRESH_SECRET} = require("../config/config");
+const {
+    ACCESS_SECRET,
+    REFRESH_SECRET
+} = require("../config/config");
 const {tokenTypesEnum} = require("../enum");
+const aouthHelper = require('../helper/AOuth.helper');
 module.exports = {
     hashPassword: (password) => bcrypt.hash(password, 10),
 
@@ -22,6 +26,11 @@ module.exports = {
             refreshToken
         }
     },
+    generateActionToken: (actionType, dataToSign = {}) => {
+        let secretWord = aouthHelper.getSecretWordForActionToken(actionType);
+
+        return jwt.sign(dataToSign, secretWord, {expiresIn: '7d'});
+    },
     checkToken: (token = '', typeToken = 'accessToken') => {
         try {
             let secret = '';
@@ -33,6 +42,15 @@ module.exports = {
 
         } catch (e) {
             throw new ApiError('Token not valid', 401);
+        }
+    },
+    checkActionToken: (token, actionType) => {
+        try {
+            let secretWord = aouthHelper.getSecretWordForActionToken(actionType);
+
+            jwt.verify(token, secretWord)
+        } catch (e) {
+            throw new ApiError('Token not valid', 401)
         }
     }
 
