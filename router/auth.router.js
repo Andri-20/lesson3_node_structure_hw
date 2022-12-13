@@ -13,6 +13,6 @@ router.post('/logoutAll', mdlwr.checkAccessToken, controller.logoutAll);
 
 router.post('/password/forgot',userMdlwr.getUserDynamically('email'),controller.forgotPassword)
 
-router.put('/password/forgot',mdlwr.checkActionToken,controller.forgotPasswordAfterForgot)
+router.put('/password/forgot',mdlwr.checkActionToken,mdlwr.checkOldPasswords,controller.forgotPasswordAfterForgot)
 
 module.exports = router;

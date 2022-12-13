@@ -17,6 +17,11 @@ module.exports = {
             throw new ApiError("Wrong password or email", 400)
         }
     },
+
+    compareOldPasswords:  (hashPassword, password) => {
+        return bcrypt.compare(password, hashPassword);
+    },
+
     generateAccessTokenPair: (dataToSign) => {
         const accessToken = jwt.sign(dataToSign, ACCESS_SECRET, {expiresIn: '15m'});
         const refreshToken = jwt.sign(dataToSign, REFRESH_SECRET, {expiresIn: '30d'})
