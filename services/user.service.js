@@ -1,4 +1,4 @@
-const User = require("../dataBase/User");
+const User = require("../DataBase/User");
 
 module.exports = {
     findByParams: async (filter = {}) => {

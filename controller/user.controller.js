@@ -1,6 +1,5 @@
 const {userService} = require('../services');
-const authService = require("../services/oauth.service");
-const emailService = require("../services/email.service");
+const User = require("../DataBase/User");
 module.exports = {
     getAllUsers: async (req, res, next) => {
         try {
@@ -15,6 +14,10 @@ module.exports = {
     getUserById: async (req, res, next) => {
         try {
             const user = await userService.findByIdWithCars(req.user._id);
+
+            req.user.comparePasswords();
+            console.log("---------------");
+            User.testStatic();
 
             res.json(user);
         } catch (e) {
@@ -37,9 +40,7 @@ module.exports = {
 
     createUser: async (req, res, next) => {
         try {
-            const hashPassword = await authService.hashPassword(req.body.password);
-
-            await userService.create({...req.body, password: hashPassword});
+            User.createUserWithHashPassword(req.body);
 
             res.status(201).json("OK");
         } catch (e) {

@@ -13,8 +13,8 @@ module.exports = {
             const {user, body} = req;
 
             await emailService.sendEmail('andsobtest@gmail.com', WELCOME, {userName: user.name})
+            await user.comparePasswords(body.password);
 
-            await oauthService.comparePasswords(user.password, body.password)
             const tokenPairs = oauthService.generateAccessTokenPair({id: user._id});
             await OAuth.create({...tokenPairs, _user_id: user._id});
 
