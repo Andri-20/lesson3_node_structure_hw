@@ -2,6 +2,9 @@ const oauthService = require("../services/oauth.service");
 const OAuth = require('../DataBase/OAuth');
 const ActionToken = require('../DataBase/ActionToken');
 const emailService = require('../services/email.service');
+const smsService = require("../services/sms.service");
+const { smsActionTypeEnum } = require("../enum");
+const smsTemplate = require("../helper/sms-template.helper");
 const userService = require('../services/user.service');
 const OldPassword = require('../DataBase/OldPassword');
 const {WELCOME, FORGOT_PASSWORD} = require("../config/email-action.enum");
@@ -13,7 +16,7 @@ module.exports = {
             const {user, body} = req;
 
             await emailService.sendEmail('andsobtest@gmail.com', WELCOME, {userName: user.name})
-
+            await smsService.sendSms(smsTemplate[smsActionTypeEnum.WELCOME](user.name), user.phone)
             await oauthService.comparePasswords(user.password, body.password)
             const tokenPairs = oauthService.generateAccessTokenPair({id: user._id});
             await OAuth.create({...tokenPairs, _user_id: user._id});
