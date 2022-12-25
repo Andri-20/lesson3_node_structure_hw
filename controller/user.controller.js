@@ -1,5 +1,6 @@
 const {userService} = require('../services');
 const User = require("../DataBase/User");
+const s3Service = require('../services/s3.service');
 module.exports = {
     getAllUsers: async (req, res, next) => {
         try {
@@ -15,7 +16,7 @@ module.exports = {
         try {
             const user = await userService.findByIdWithCars(req.user._id);
 
-            req.user.comparePasswords();
+           await req.user.comparePasswords();
             console.log("---------------");
             User.testStatic();
 
@@ -50,11 +51,21 @@ module.exports = {
 
     deleteUserById: async (req, res, next) => {
         try {
-            await userService.deleteOne(req.params.userId);
+             userService.deleteOne(req.params.userId);
 
             res.status(204).send('Ok')
         } catch (e) {
             next(e);
+        }
+    },
+    uploadAvatar: async (req, res, next) => {
+        try {
+            const uploadedData = await s3Service.uploadPublicFile(req.files.avatar, 'user', req.user._id);
+            const updatedUser = await User.findByIdAndUpdate(req.user._id, {avatar: uploadedData.Location}, {new: true});
+
+            res.json(updatedUser)
+        } catch (e) {
+            next(e)
         }
     }
 };
